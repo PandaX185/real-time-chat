@@ -5,7 +5,11 @@ interface MessageProps {
 }
 
 const Message: React.FC<MessageProps> = ({ message }) => {
-  return <div>{message}</div>;
+  return (
+    <div className="p-2 bg-gray-200 rounded">
+      {message}
+    </div>
+  );
 };
 
 export default Message;

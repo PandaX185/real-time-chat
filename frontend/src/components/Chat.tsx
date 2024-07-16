@@ -26,19 +26,21 @@ const Chat: React.FC = () => {
 
   return (
     <div>
-      <h1>Chat Application</h1>
-      <div>
+      <h1 className="text-2xl font-bold mb-4">Chat Application</h1>
+      <div className="mb-4 space-y-2">
         {messages.map((msg, index) => (
           <Message key={index} message={msg} />
         ))}
       </div>
-      <form onSubmit={sendMessage}>
+      <form onSubmit={sendMessage} className="flex space-x-2">
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          className="flex-grow p-2 border rounded"
+          placeholder="Type your message..."
         />
-        <button type="submit">Send</button>
+        <button type="submit" className="p-2 bg-blue-500 text-white rounded">Send</button>
       </form>
     </div>
   );
