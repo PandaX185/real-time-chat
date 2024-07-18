@@ -5,10 +5,17 @@ import axios from 'axios';
 
 const socket = io('http://localhost:4000');
 
+class User {
+  constructor(
+    public id: string,
+    public username: string,
+  ){}
+}
+
 const Chat: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [messages, setMessages] = useState<string[]>([]);
-  const [users, setUsers] = useState<string[]>([]); 
+  const [users, setUsers] = useState<User[]>([]); 
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<string>('') ;
 
@@ -23,24 +30,23 @@ const Chat: React.FC = () => {
         });
         
         setCurrentUser(response.data);
+        console.log(currentUser);
       }catch(err){
         console.log('Failed to get user info '+ err);
       }
     }
 
     getCurrentUser();
-  },[]);
+  },);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get('http://localhost:4000/api/users');
-        const users: {id:string,username:string}[] = response.data;
-        users.filter((user)=>{
-          user.id != currentUser
-        });
+        const users: User[] = response.data;
+        users.filter((user)=>user.id != currentUser);
 
-        setUsers(users.map(user=>user.username));
+        setUsers(users);
       } catch (error) {
         console.error('Failed to fetch users', error);
       }
@@ -48,8 +54,8 @@ const Chat: React.FC = () => {
 
     fetchUsers();
 
-    socket.on('receiveMessage', (msg: { from: string; content: string }) => {
-      if (msg.from === selectedUser) {
+    socket.on('receiveMessage', (msg: { senderId: string; content: string; receiverId: string }) => {
+      if (msg.senderId === selectedUser && msg.receiverId == currentUser) {
         setMessages((prevMessages) => [...prevMessages, msg.content]);
       }
     });
@@ -85,8 +91,8 @@ const Chat: React.FC = () => {
         <h2 className="text-xl">Select User:</h2>
         <ul>
           {users.map((user) => (
-            <li key={user} onClick={() => handleUserSelect(user)} className="cursor-pointer">
-              {user}
+            <li key={user.id} onClick={() => handleUserSelect(user.id)} className="cursor-pointer">
+              {user.username}
             </li>
           ))}
         </ul>
