@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 router.post('/messages', async (req, res) => {
     const { content, receiverId, senderId } = req.body;
     const token = req.headers['authorization']?.split(' ')[1];
-    if (!token){
-        res.status(401).json({error: 'Invalid credentials'});
+    if (!token) {
+        res.status(401).json({ error: 'Invalid credentials' });
     }
     try {
         const message = await prisma.message.create({
@@ -25,12 +25,19 @@ router.post('/messages', async (req, res) => {
     }
 });
 
-router.get('/messages/:userId', async (req,res)=>{
-    const {userId: senderId} = req.params
-    try{
+router.get('/messages/:userId', async (req, res) => {
+    const { userId } = req.params
+    try {
         const messages = await prisma.message.findMany({
             where: {
-                senderId,
+                OR: [
+                    {
+                        senderId: +userId
+                    },
+                    {
+                        receiverId: +userId
+                    }
+                ]
             },
             orderBy: {
                 createdAt: 'desc',
@@ -38,8 +45,8 @@ router.get('/messages/:userId', async (req,res)=>{
         })
 
         res.json(messages);
-    }catch(err){
-        res.status(500).json({error: `Failed to get messages ${err}`});
+    } catch (err) {
+        res.status(500).json({ error: `Failed to get messages ${err}` });
     }
 });
 

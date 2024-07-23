@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Register from './Register';
 import Login from './Login';
 import Chat from './Chat';
 import Home from './Home';
+import { initiateSocket } from '../socket';
 
 const App: React.FC = () => {
+
+    useEffect(() => {
+        initiateSocket();
+    }, []);
+
     return (
         <Router>
             <Routes>
