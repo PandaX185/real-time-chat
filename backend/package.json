@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node-dev src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc src/server.ts",
+    "start": "node src/server.js",
+    "dev": "ts-node-dev src/server.ts"
   },
   "keywords": [],
   "author": "",

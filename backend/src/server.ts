@@ -1,12 +1,12 @@
-import express from 'express';
-import http from 'http';
+import express = require('express');
+import http = require('http');
 import { Server } from 'socket.io';
-import cors from 'cors';
+import cors = require('cors');
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import messageRoutes from './routes/message';
 import { PrismaClient } from '@prisma/client';
-import dotenv from 'dotenv';
+import dotenv = require('dotenv');
 
 dotenv.config();
 

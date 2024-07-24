@@ -1,0 +1,30 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - SERVER_PORT=4000
+      - DATABASE_URL=file:db/chat.db
+      - JWT_SECRET=top-secret
+      - DEBUG=socket.io*
+    depends_on:
+      - db
+
+  db:
+    image: nouchka/sqlite3
+    volumes:
+      - ./backend/db/chat.db:/data/sqlite.db
+    environment:
+      - SQLITE_DATABASE=/data/sqlite.db

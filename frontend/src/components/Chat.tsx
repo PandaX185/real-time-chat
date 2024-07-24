@@ -15,7 +15,7 @@ const Chat: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User>();
   const navigate = useNavigate();
 
-  const userStyle = 'cursor-pointer text-gray-200 hover:bg-teal-800 duration-100 ease-linear font-bold my-3 p-5';
+  const userStyle = 'cursor-pointer text-sm md:text-md text-gray-200 hover:bg-teal-800 duration-100 ease-linear font-bold my-3 p-5';
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -75,8 +75,9 @@ const Chat: React.FC = () => {
   const handleUserSelect = async (user: string) => {
     setSelectedUser(user);
     try {
-      const response = await axios.get(`http://localhost:4000/api/messages/${user}`);
+      const response = await axios.get(`http://localhost:4000/api/messages/${user}/${currentUser?.username}`);
       const messages: MessageModel[] = response.data
+
       setMessages(() => messages);
     } catch (error) {
       console.error('Failed to load messages', error);
@@ -85,7 +86,7 @@ const Chat: React.FC = () => {
 
   return (
     <div className="mb-4 flex h-screen w-full">
-      <div className='h-screen flex flex-col px-6 pt-5 justify-between bg-gray-200'>
+      <div className='h-screen w-[20%] flex flex-col px-6 pt-5 justify-between bg-gray-200'>
         <ul>
           {users.map((user) => (
             <li className={(user.username == selectedUser) ? userStyle + ' bg-teal-800' : userStyle + ' bg-teal-600'}
@@ -94,15 +95,15 @@ const Chat: React.FC = () => {
             </li>
           ))}
         </ul>
-        <div className='flex justify-between items-center pb-5 cursor-pointer' onClick={() => {
+        <div className='flex justify-evenly items-center pb-5 cursor-pointer' onClick={() => {
           navigate('/', {
             replace: true,
           })
         }}>
-          <h2 className='text-teal-600 text-2xl font-semibold'>
+          <h2 className='text-teal-600 text-xl font-semibold'>
             {currentUser?.username}
           </h2>
-          <TbLogout2 size={20} />
+          <TbLogout2 className='size-4 md:size-6 text-teal-600' />
         </div>
       </div>
 
