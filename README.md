@@ -21,3 +21,12 @@ This is a real-time chat application built with Node.js, TypeScript, Express, So
 ```bash
 git clone https://github.com/your-username/real-time-chat.git
 cd real-time-chat
+```
+
+### Run the app as a whole
+
+`docker-compose up --build` to run both the frontend and backend and then you will be able to access the app on localhost port 3000
+
+### Run app customly
+
+You can run the front-end/back-end parts independently by using the Makefile commands defined for each one
