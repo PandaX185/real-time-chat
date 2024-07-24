@@ -25,10 +25,10 @@ model User {
 model Message {
   id       Int    @id @default(autoincrement()) 
   content    String
-  senderId   Int   
-  receiverId Int   
+  sender   String   
+  receiver String   
   createdAt  DateTime @default(now())
-  User       User?    @relation(fields: [senderId], references: [id])
+  User       User?    @relation(fields: [sender], references: [username])
 
   @@map("messages")
 }

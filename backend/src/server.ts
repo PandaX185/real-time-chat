@@ -30,11 +30,11 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  socket.on('sendMessage', async ({ content, senderId, receiverId }) => {
-    console.log('sendMessage event received:', { content, senderId, receiverId });
+  socket.on('sendMessage', async ({ content, sender, receiver }) => {
+    console.log('sendMessage event received:', { content, sender, receiver });
     try {
       const message = await prisma.message.create({
-        data: { content, senderId, receiverId },
+        data: { content, sender, receiver },
       });
       console.log('Message saved:', message);
 

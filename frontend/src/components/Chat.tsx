@@ -4,13 +4,18 @@ import Message from './Message';
 import axios from 'axios';
 import { User } from '../models/user';
 import { Message as MessageModel } from '../models/message';
+import { TbLogout2 } from "react-icons/tb";
+import { useNavigate } from 'react-router-dom';
 
 const Chat: React.FC = () => {
   const [message, setMessage] = useState<string>('');
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<MessageModel[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<string>('');
+  const [currentUser, setCurrentUser] = useState<User>();
+  const navigate = useNavigate();
+
+  const userStyle = 'cursor-pointer text-gray-200 hover:bg-teal-800 duration-100 ease-linear font-bold my-3 p-5';
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -36,7 +41,7 @@ const Chat: React.FC = () => {
       try {
         const response = await axios.get('http://localhost:4000/api/users');
         const users: User[] = response.data;
-        users.filter((user) => user.id != currentUser);
+        users.filter((user) => user.username != currentUser?.username);
 
         setUsers(users);
       } catch (error) {
@@ -47,11 +52,11 @@ const Chat: React.FC = () => {
     fetchUsers();
 
     const socket = getSocket();
-    socket.on('receiveMessage', (msg: { senderId: string; content: string; receiverId: string }) => {
-      if (msg.senderId === selectedUser && msg.receiverId == currentUser ||
-        msg.senderId === currentUser && msg.receiverId == selectedUser
+    socket.on('receiveMessage', (msg: MessageModel) => {
+      if (msg.sender === selectedUser && msg.receiver == currentUser?.username ||
+        msg.sender === currentUser?.username && msg.receiver == selectedUser
       ) {
-        setMessages((prevMessages) => [...new Set([...prevMessages, msg.content])]);
+        setMessages((prevMessages) => [...new Set([...prevMessages, msg])]);
       }
     });
 
@@ -62,56 +67,62 @@ const Chat: React.FC = () => {
     if (selectedUser) {
 
       const socket = getSocket();
-      socket.emit('sendMessage', { receiverId: selectedUser, content: message, senderId: currentUser });
-      setMessages((prevMessages) => [...prevMessages, message]);
+      socket.emit('sendMessage', { receiver: selectedUser, content: message, sender: currentUser?.username });
       setMessage('');
     }
   };
 
-  const handleUserSelect = async (userId: string) => {
-    setSelectedUser(userId);
+  const handleUserSelect = async (user: string) => {
+    setSelectedUser(user);
     try {
-      const response = await axios.get(`http://localhost:4000/api/messages/${userId}`);
+      const response = await axios.get(`http://localhost:4000/api/messages/${user}`);
       const messages: MessageModel[] = response.data
-      setMessages(() => messages.map((msg) => msg.content));
+      setMessages(() => messages);
     } catch (error) {
       console.error('Failed to load messages', error);
     }
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Chat Application</h1>
-      <div className="mb-4">
-        <h2 className="text-xl">Select User:</h2>
+    <div className="mb-4 flex h-screen w-full">
+      <div className='h-screen flex flex-col px-6 pt-5 justify-between bg-gray-200'>
         <ul>
           {users.map((user) => (
-            <li key={user.id} onClick={() => handleUserSelect(user.id)} className="cursor-pointer">
-              {user.username}
+            <li className={(user.username == selectedUser) ? userStyle + ' bg-teal-800' : userStyle + ' bg-teal-600'}
+              key={user.username} onClick={() => handleUserSelect(user.username)}>
+              {(user.username == currentUser?.username) ? 'Personal Chat' : user.username}
             </li>
           ))}
         </ul>
-      </div>
-      {selectedUser && (
-        <div>
-          <h2 className="text-xl mb-2">Chat with {selectedUser}</h2>
-          <div className="mb-4 space-y-2">
-            {messages.map((msg, index) => (
-              <Message key={index} message={msg} />
-            ))}
-          </div>
-          <form onSubmit={sendMessage} className="flex space-x-2">
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="flex-grow p-2 border rounded"
-              placeholder="Type your message..."
-            />
-            <button type="submit" className="p-2 bg-blue-500 text-white rounded">Send</button>
-          </form>
+        <div className='flex justify-between items-center pb-5 cursor-pointer' onClick={() => {
+          navigate('/', {
+            replace: true,
+          })
+        }}>
+          <h2 className='text-teal-600 text-2xl font-semibold'>
+            {currentUser?.username}
+          </h2>
+          <TbLogout2 size={20} />
         </div>
-      )}
+      </div>
+
+      <div className='m-4 w-full h-screen'>
+        <div className="mb-4 space-y-2">
+          {messages.map((msg, index) => (
+            <Message key={index} message={msg.content} sender={msg.sender} />
+          ))}
+        </div>
+        <form onSubmit={sendMessage} className="flex space-x-2">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="flex-grow p-2 border rounded"
+            placeholder="Type your message..."
+          />
+          <button type="submit" className="p-2 bg-blue-500 text-white rounded">Send</button>
+        </form>
+      </div>
     </div>
   );
 };
